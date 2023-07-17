@@ -18,39 +18,74 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Get Branches with Tag
-        id: branches_with_tag
-        run: |
-          BRANCHES=$(curl -s -H "Authorization: token ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/git/matching-refs/tags/asdf" | jq -r '.[].ref' | awk -F/ '{print $3}')
-          echo "::set-output name=branches_with_tag::$BRANCHES"
+      # - name: TEST
+      #   id: test
+      #   run: |
+      #     source_branch="feature-branch"
+      #     target_branch="main"
 
-          # TAG_NAME="asdf"
-          # BRANCHES=$(git for-each-ref --format='%(refname:short)' refs/heads/ --contains "refs/tags/$TAG_NAME")
-          # echo "::set-output name=branches_with_tag::$BRANCHES"
+      #     response=$(curl -L -X POST \
+      #     -H "Accept: application/vnd.github+json" \
+      #     -H "Authorization: Bearer ${{github.token}}" \
+      #     -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/free-cutyapple/test/merges \
+      #     -d '{"base":"iok210", "head": "main", "commit_message": "Merge"}')
 
-      - name: Display Branches with Tag
-        run: |
-          echo "Branches with Tag: ${{ steps.branches_with_tag.outputs.branches_with_tag }}"
+      #     response=$(curl -L -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{github.token}}" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/free-cutyapple/test/merges -d '{"base":"iok210", "head": "main", "commit_message": "Merge"}')
+
+      #       echo "$response"
+
+      #       echo "$response | jq -r '.status'"
+
+      #       # API 응답에서 병합 결과 확인
+      #       merged=$(echo "$response" | jq -r '.merged')
+
+      #       if [[ "$merged" == "true" ]]; then
+      #         echo "브랜치 병합 성공"
+      #       else
+      #         echo "브랜치 병합 실패"
+      #       fi
 
       - name: Check if PR is closed
         id: doing
         run: |
           echo "Run Auto-Merge script."
 
+          BRANCHES=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
+          "https://api.github.com/repos/${{ github.repository }}/branches" | jq -r '.[].name')
+
           PR_NUMBER=$(jq -r '.pull_request.number' < "$GITHUB_EVENT_PATH")
           PR_STATE=$(jq -r '.pull_request.state' < "$GITHUB_EVENT_PATH")
           BRANCH_NAME=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
             "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER" | jq -r '.head.ref')
+          PREFIX=M2SP-2306-02
 
-            # declare -a DESIRED_BRANCHES=("branch1" "branch2" "branch3")
-            # for DESIRED_BRANCH in "${DESIRED_BRANCHES[@]}"; do
-            #   if [ "$PR_STATE" = "closed" ]; then
-            #     echo "Merging PR $PR_NUMBER to $DESIRED_BRANCH branch"
-            #     git config user.name github-actions
-            #     git config user.email github-actions@github.com
-            #     git checkout "$DESIRED_BRANCH"
-            #     git merge "$BRANCH_NAME" --no-ff --no-commit
-            #     git commit -m "Auto-merge PR #$PR_NUMBER to $DESIRED_BRANCH branch"
-            #     git push origin "$DESIRED_BRANCH"
-            #   fi
-            # done
+
+          for BRANCH in $BRANCHES; do
+            catch() {
+              echo "$BRANCH에서 하자 발생."
+              curl -X POST -H 'Content-type: application/json' --data '{"text":"'"$BRANCH"에서 에러가 발생했습니다.'"}' 
+              return 0
+            }
+
+            # trap 설정
+            trap catch ERR
+
+            if [[ $BRANCH == "$PREFIX"* ]]; then
+
+              echo "Merging PR $PR_NUMBER to $BRANCH branch"
+
+
+              AA=$(curl -i -L -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{github.token}}" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/free-cutyapple/test/merges -d '{"base":"'"$BRANCH"'", "head": "main", "commit_message": "Merge"}')
+
+              echo $AA
+              STATUS_CODE=$(echo "$AA" | grep -o -P '(?<=HTTP/2 )[0-9]+')
+
+              echo $STATUS_CODE
+
+              if [ $STATUS_CODE -ge 200 ] && [ $STATUS_CODE -lt 300 ]; then
+                curl -X POST -H 'Content-type: application/json' --data '{"text":"The merge from main to '"$BRANCH"' was successful."}'   
+              else
+                curl -X POST -H 'Content-type: application/json' --data '{"text":"The merge from main to '"$BRANCH"' failed. | STATUS CODE :'"$STATUS_CODE"'}' 
+              fi
+            fi
+          done
