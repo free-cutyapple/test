@@ -10,12 +10,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check if PR is closed
-        run: |
-          echo "Run Auto-Merge script."
+      - name: Checkout Repository
+        uses: actions/checkout@v2
 
+      - name: Get Branches
+        id: branches
+        run: |
           BRANCHES=$(git ls-remote --heads origin | awk -F/ '{print $3}')
           echo "::set-output name=branches::$BRANCHES"
+
+      - name: Check if PR is closed
+        id: doing
+        run: |
+          echo "Run Auto-Merge script."
 
           PR_NUMBER=$(jq -r '.pull_request.number' < "$GITHUB_EVENT_PATH")
           PR_STATE=$(jq -r '.pull_request.state' < "$GITHUB_EVENT_PATH")
