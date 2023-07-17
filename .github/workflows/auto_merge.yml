@@ -22,8 +22,8 @@ jobs:
         id: branches_with_tag
         run: |
           echo "wow"
-
-          git -c user.token ${{github.token}} branch --contains asdf
+          
+          git -c user.token=${{github.token}} branch --contains asdf
 
 
 
