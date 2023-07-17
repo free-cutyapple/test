@@ -1,6 +1,6 @@
 name: Auto Merge PR
 
-# on:
+# on: 
 #   pull_request:
 #     types:
 #       - closed
@@ -24,7 +24,7 @@ jobs:
           ASDFG=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
           https://api.github.com/repos/${{ github.repository }}/branches)
 
-          echo ASDFG
+          echo "$ASDFG"
 
           TAG_NAME="asdf"
           BRANCHES=$(git for-each-ref --format='%(refname:short)' refs/heads/ --contains "refs/tags/$TAG_NAME")
