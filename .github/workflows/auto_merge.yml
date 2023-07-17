@@ -1,0 +1,33 @@
+name: Auto Merge PR
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check if PR is closed
+        run: |
+          if [ "$GITHUB_EVENT_NAME" != "pull_request" ]; then
+            echo "This action can only be run on pull_request closed event."
+            exit 1
+          fi
+
+          PR_NUMBER=$(jq -r '.pull_request.number' < "$GITHUB_EVENT_PATH")
+          PR_STATE=$(jq -r '.pull_request.state' < "$GITHUB_EVENT_PATH")
+          BRANCH_NAME=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" | jq -r '.head.ref')
+
+          if [ "$PR_STATE" = "closed" ] && [ "$BRANCH_NAME" = "my-branch" ]; then
+            echo "Merging PR $PR_NUMBER to desired branch"
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git checkout desired-branch
+            git merge "$BRANCH_NAME" --no-ff --no-commit
+            git commit -m "Auto-merge PR #$PR_NUMBER to desired branch"
+            git push origin desired-branch
+          fi
