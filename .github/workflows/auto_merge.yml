@@ -1,6 +1,6 @@
 name: Auto Merge PR
 
-# on:
+# on:f
 #   pull_request:
 #     types:
 #       - closed
