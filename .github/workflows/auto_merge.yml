@@ -3,7 +3,7 @@ name: Auto Merge PR
 # on:
 #   pull_request:
 #     types:
-#       - closed
+#       - closed1234
 
 on:
   pull_request:
