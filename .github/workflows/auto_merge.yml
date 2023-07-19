@@ -1,7 +1,7 @@
 name: Auto Merge PR
 
 # on:
-#   pull_request:
+#   pull_request:a
 #     types:
 #       - closed
 
@@ -41,20 +41,23 @@ jobs:
 
 
           for BRANCH in "${BRANCHES[@]}"; do
+            echo "$BRANCH - for"
             if [[ $BRANCH == $PREFIX* ]]; then
               echo "Merging PR $PR_NUMBER to $BRANCH branch"
               git config user.name github-actions
               git config user.email github-actions@github.com
               git checkout "$BRANCH"
+              echo "Checkout $BRANCH"
               # git merge "$BRANCH_NAME" --no-ff --no-commit
               # git commit -m "Auto-merge PR #$PR_NUMBER to $BRANCH branch"
               # git push origin "$BRANCH"
             fi
+            echo "$BRANCH - for END"
           done
 
 
           # PR_NUMBER=$(jq -r '.pull_request.number' < "$GITHUB_EVENT_PATH")
-          # PR_STATE=$(jq -r '.pull_request.state' < "$GITHUB_EVENT_PATH")ㅁ
+          # PR_STATE=$(jq -r '.pull_request.state' < "$GITHUB_EVENT_PATH")
           # BRANCH_NAME=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
           #   "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER" | jq -r '.head.ref')
 
