@@ -39,7 +39,7 @@ jobs:
               # if [ "$PR_STATE" = "closed" ]; then
               #   echo "Merging PR $PR_NUMBER to $DESIRED_BRANCH branch"
               #   git config user.name github-actions
-              #   git config user.email github-actions@github.com
+              #   git config user.email github-actions@github.comf
               #   git checkout "$DESIRED_BRANCH"
               #   git merge "$BRANCH_NAME" --no-ff --no-commit
               #   git commit -m "Auto-merge PR #$PR_NUMBER to $DESIRED_BRANCH branch"
