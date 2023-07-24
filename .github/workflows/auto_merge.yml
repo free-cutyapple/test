@@ -1,3 +1,5 @@
+# 123
+
 name: Auto Merge PR
 
 on:
@@ -54,12 +56,12 @@ jobs:
                   
                 if [ $STATUS_CODE -ge 200 ] && [ $STATUS_CODE -lt 300 ]; then
                   curl -H 'Content-type: application/json' \
-                    --data '{"text":"[SUCCESS : '"$STATUS_CODE"'] The merge from main to *'"$BRANCH"'* was successful."}' \
+                    --data '{"text":"[SUCCESS : '"$STATUS_CODE"'] The merge from main to *'"$BRANCH"'* was successful"}' \
                     -H "Authorization: Bearer ${{ github.token}}" \
                     -X POST ${{ secrets.SLACK_FE_AUTO_BOT_WEBHOOK_URL }}
                 elif [ $STATUS_CODE == 409 ]; then
                   curl -H 'Content-type: application/json' \
-                    --data '{"text":"[CONFLICT : '"$STATUS_CODE"'] The merge from main to *'"$BRANCH"'* conflicted."}' \
+                    --data '{"text":"[CONFLICT : '"$STATUS_CODE"'] The merge from main to *'"$BRANCH"'* conflicted"}' \
                     -H "Authorization: Bearer ${{ github.token}}" \
                     -X POST ${{ secrets.SLACK_FE_AUTO_BOT_WEBHOOK_URL }}
                 else
