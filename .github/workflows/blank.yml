@@ -9,7 +9,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  cron:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -27,3 +27,8 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
+
+      - name: notify to slack
+        run: |
+          a = $(curl -X POST --data-urlencode "payload={\"channel\": \"#my-channel-here\", \"username\": \"webhookbot\", \"text\": \"이 항목은 #개의 my-channel-here에 포스트되며 webhookbot이라는 봇에서 제공됩니다.\", \"icon_emoji\": \":ghost:\"}" https://hooks.slack.com/services/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)
+          echo $a
