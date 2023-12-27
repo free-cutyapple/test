@@ -2,7 +2,7 @@ name: cron
 
 on:
   schedule:
-    - cron: "*/1 * * * *"
+    - cron: "*/5 * * * *"
 
 jobs:
   cron:
@@ -20,6 +20,6 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: say wow
+      - name: say wow C06BKM8385T
         run: |
           echo "wow"
