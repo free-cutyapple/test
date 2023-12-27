@@ -30,8 +30,8 @@ jobs:
 
       - name: notify to slack
         run: |
-          curl 
-            -X POST 
-            --data-urlencode 
-            "payload={\"channel\": \"#my-channel-here\", \"username\": \"webhookbot\", \"text\": \"이 항목은 #개의 my-channel-here에 포스트되며 webhookbot이라는 봇에서 제공됩니다.\", \"icon_emoji\": \":ghost:\"}" 
+          curl  \
+            -X POST  \
+            --data-urlencode \
+            "payload={\"channel\": \"#my-channel-here\", \"username\": \"webhookbot\", \"text\": \"이 항목은 #개의 my-channel-here에 포스트되며 webhookbot이라는 봇에서 제공됩니다.\", \"icon_emoji\": \":ghost:\"}"  \
             https://hooks.slack.com/services/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
