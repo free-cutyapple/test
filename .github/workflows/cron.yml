@@ -28,14 +28,19 @@ jobs:
               -H "X-GitHub-Api-Version: 2022-11-28" \
               "https://api.github.com/repos/${{ github.repository }}/git/refs/tags" | jq -r '.[] | select(.ref | contains("staging") or contains("dev")) | {name: .ref | split("/") | last, sha: .object.sha}')
 
-          echo "::set-output name=tags::$TAGS"
+          echo $TAGS
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
       - name: Set staging/dev branches
         run: |
           STAGING_BRANCH=""
           DEV_BRANCH=""
 
+          echo $steps.get-tags.outputs.tags
+
           for TAG in "${{ steps.get-tags.outputs.tags }}"; do
+            echo $TAG
+            echo $steps.get-tags.outputs.tags
             NAME=$(echo "$TAG" | jq -r '.name')
             SHA=$(echo "$TAG" | jq -r '.sha')
 
@@ -43,13 +48,13 @@ jobs:
               STAGING_BRANCH=$(echo "$(git branch --contains $SHA)" | sed -e 's/ //g; s/\*//g')
             elif [ $NAME == 'dev' ]; then
               BRANCHES_STR=$(echo "$(git branch --contains $SHA)" | sed -e 's/ //g; s/\*//g')
-              IFS='\n' read -r -A BRANCHES <<< $BRANCHES_STR
+              # IFS='\n' read -r -A BRANCHES <<< $BRANCHES_STR
 
-              for BRANCH in "${BRANCHES[@]}"; do
-                echo $BRANCH
-              done;
+              # for BRANCH in "${BRANCHES[@]}"; do
+              #   echo $BRANCH
+              # done;
 
-              DEV_BRANCH=$(echo "$(git branch --contains $SHA)" | sed -e 's/ //g; s/\*//g')
+              # DEV_BRANCH=$(echo "$(git branch --contains $SHA)" | sed -e 's/ //g; s/\*//g')
             else
               echo "Staging / Dev 환경으로 추정되는 브랜치가 없습니다."
               exit 1;
@@ -64,8 +69,8 @@ jobs:
               exit 1;
           fi;
 
-          git checkout $DEV_BRANCH
-          git
+          # git checkout $DEV_BRANCH
+          # git
 
       # - name: notify to slack
       #   run: |
@@ -74,21 +79,3 @@ jobs:
       #       --data-urlencode \
       #       "payload={\"channel\": \"#test-for-slack-notification\", \"username\": \"webhookbot\", \"text\": \"이 항목은 #개의 my-channel-here에 포스트되며 webhookbot이라는 봇에서 제공됩니다.\", \"icon_emoji\": \":ghost:\"}" \
       #       https://hooks.slack.com/services/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
-
-# TAGS=$(curl -L \
-# -H "Accept: application/vnd.github+json" \
-# -H "Authorization: Bearer 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" \
-# -H "X-GitHub-Api-Version: 2022-11-28" \
-# "https://api.github.com/repos/free-cutyapple/test/git/refs/tags" | jq -r '.[].ref | sub("refs/tags/";"")')
-
-# curl -L \
-# -H "Accept: application/vnd.github+json" \
-# -H "Authorization: Bearer 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" \
-# -H "X-GitHub-Api-Version: 2022-11-28" \
-# "https://api.github.com/repos/free-cutyapple/test/git/refs/tags" | jq -r '.[].ref | sub("refs/tags/";"")'
-
-# curl -L \
-# -H "Accept: application/vnd.github+json" \
-# -H "Authorization: Bearer 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" \
-# -H "X-GitHub-Api-Version: 2022-11-28" \
-# "https://api.github.com/repos/free-cutyapple/test/git/refs/tags"
