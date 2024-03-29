@@ -2,7 +2,7 @@ name: Auto Back Merge Cron
 
 on:
   schedule:
-    - cron: "5 * * * *"
+    - cron: "*/5 * * * *"
     # - cron: '30 6,13 * * 1-5'
 
 jobs:
@@ -49,9 +49,14 @@ jobs:
 
             if [ $STATUS_CODE -ge 200 ] && [ $STATUS_CODE -lt 300 ]; then
               echo "Merge successful: $SOURCE_BRANCH to $TARGET_BRANCH"
-              curl -H 'Content-type: application/json' \
-                --data '{"text":"🟢 [Merge Success] *'"$SOURCE_BRANCH to $TARGET_BRANCH"'*"}' \
-                -X POST ${{ secrets.SLACK_FE_AUTO_BOT_WEBHOOK_URL }}
+              SOURCE_BRANCH='1234'
+              TARGET_BRANCH='ㅁㄴㅇㄹ'
+              curl -X POST \
+                -H 'Content-type: application/json' \
+                --data '{"text":"🟢 [Merge Success] *'$SOURCE_BRANCH' to '$TARGET_BRANCH'*"}' \
+                https://hooks.slack.com/services/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
+                
+                ${{ secrets.SLACK_FE_AUTO_BOT_WEBHOOK_URL }}
 
             elif [ $STATUS_CODE == 409 ]; then
               echo "Conflict detected: $SOURCE_BRANCH to $TARGET_BRANCH"
