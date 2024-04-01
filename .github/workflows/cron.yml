@@ -1,66 +1,69 @@
-name: cron_test
+name: Auto Back Merge Cron
 
 on:
   schedule:
     - cron: "*/5 * * * *"
+    # - cron: '30 6,13 * * 1-5'
 
 jobs:
-  cron:
+  cron_schedule:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v2
 
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20.x
-
-      - name: Get List of Tag
+      - name: Merge Main to Branches
         run: |
-          TAGS=$(curl -L \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer ${{ github.token }}" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              "https://api.github.com/repos/${{ github.repository }}/git/refs/tags" | jq -r '.[].ref')
+          echo "Run Auto-Merge script."
 
-          echo "::set-output name=tags::$TAGS"
+          BRANCHES=("main" "staging" "dev")
 
-      - name: Get Tag Names
-        run: |
-          ASDF=$(git branch --contains 81a0e0626cf9a7efccbd214a50345eb2c67ea3ee)
-          echo $ASDF
+          for ((i=0; i<${#BRANCHES[@]}-1; i++)); do
+            catch() {
+                echo "$BRANCH에서 하자 발생."
+                curl -H 'Content-type: application/json' \
+                --data '{"text":"Git actions - Auto Merge 중 에러가 발생했습니다."}' \
+                -H "Authorization: Bearer ${{ github.token}}" \
+                -X POST ${{ secrets.SLACK_FE_AUTO_BOT_WEBHOOK_URL }}
+                return 0
+            }
 
-      # - name: notify to slack
-      #   run: |
-      #     curl \
-      #       -X POST \
-      #       --data-urlencode \
-      #       "payload={\"channel\": \"#test-for-slack-notification\", \"username\": \"webhookbot\", \"text\": \"이 항목은 #개의 my-channel-here에 포스트되며 webhookbot이라는 봇에서 제공됩니다.\", \"icon_emoji\": \":ghost:\"}" \
-      #       https://hooks.slack.com/services/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
+            trap catch ERR
 
-#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
+            SOURCE_BRANCH=${BRANCHES[i]}
+            TARGET_BRANCH=${BRANCHES[i+1]}
 
-#
+            echo "Merge $SOURCE_BRANCH to $TARGET_BRANCH branch"
 
-# TAGS=$(curl -L \
-# -H "Accept: application/vnd.github+json" \
-# -H "Authorization: Bearer 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" \
-# -H "X-GitHub-Api-Version: 2022-11-28" \
-# "https://api.github.com/repos/free-cutyapple/test/git/refs/tags" | jq -r '.[].ref | sub("refs/tags/";"")')
+            MERGE_RESPONSE=$(curl -i -L \
+              -X POST -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{github.token}}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/${{ github.repository }}/merges \
+              -d '{"base":"'"$TARGET_BRANCH"'", "head": "'"$SOURCE_BRANCH"'", "commit_message": "Merge '$SOURCE_BRANCH' to '$TARGET_BRANCH'"}')
 
-# curl -L \
-# -H "Accept: application/vnd.github+json" \
-# -H "Authorization: Bearer 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" \
-# -H "X-GitHub-Api-Version: 2022-11-28" \
-# "https://api.github.com/repos/free-cutyapple/test/git/refs/tags" | jq -r '.[].ref | sub("refs/tags/";"")'
+            echo $MERGE_RESPONSE
 
-# curl -L \
-# -H "Accept: application/vnd.github+json" \
-# -H "Authorization: Bearer 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" \
-# -H "X-GitHub-Api-Version: 2022-11-28" \
-# "https://api.github.com/repos/free-cutyapple/test/git/refs/tags"
+            STATUS_CODE=$(echo "$MERGE_RESPONSE" | grep -o -P '(?<=HTTP/2 )[0-9]+')
 
+            if [ $STATUS_CODE -ge 200 ] && [ $STATUS_CODE -lt 300 ]; then
+              echo "Merge successful: $SOURCE_BRANCH to $TARGET_BRANCH"
+              curl -X POST \
+                -H 'Content-type: application/json' \
+                --data '{"text":"🟢 [Merge Success] *'$SOURCE_BRANCH' to '$TARGET_BRANCH'*"}' \
+                ${{ secrets.SLACK_FE_AUTO_BOT_WEBHOOK_URL }}
+
+            elif [ $STATUS_CODE == 409 ]; then
+              echo "Conflict detected: $SOURCE_BRANCH to $TARGET_BRANCH"
+              curl -X POST \
+                -H 'Content-type: application/json' \
+                --data '{"text":"🔴 [Merge Conflict] *'$SOURCE_BRANCH' to '$TARGET_BRANCH'*"}' \
+                ${{ secrets.SLACK_FE_AUTO_BOT_WEBHOOK_URL }}
+
+            else
+              echo "Merge failed: $SOURCE_BRANCH to $TARGET_BRANCH"
+              curl -X POST \
+                -H 'Content-type: application/json' \
+                --data '{"text":"🔴 [Merge Failed] *'$SOURCE_BRANCH' to '$TARGET_BRANCH'*"}' \
+                ${{ secrets.SLACK_FE_AUTO_BOT_WEBHOOK_URL }}
+            fi
+          done
