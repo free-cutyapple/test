@@ -45,29 +45,27 @@ jobs:
 
             STATUS_CODE=$(echo "$MERGE_RESPONSE" | grep -o -P '(?<=HTTP/2 )[0-9]+')
 
-            curl -X POST -H 'Content-type: application/json' --data '{"text":"Hello, World!"}' https://hooks.slack.com/services/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
+            curl -X POST -H 'Content-type: application/json' --data '{"text":"Hello, World!"}' ${{ secrets.SLACK_FE_AUTO_BOT_WEBHOOK_URL }}
 
             if [ $STATUS_CODE -ge 200 ] && [ $STATUS_CODE -lt 300 ]; then
               echo "Merge successful: $SOURCE_BRANCH to $TARGET_BRANCH"
-              SOURCE_BRANCH='1234'
-              TARGET_BRANCH='ㅁㄴㅇㄹ'
               curl -X POST \
                 -H 'Content-type: application/json' \
                 --data '{"text":"🟢 [Merge Success] *'$SOURCE_BRANCH' to '$TARGET_BRANCH'*"}' \
-                https://hooks.slack.com/services/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
-                
                 ${{ secrets.SLACK_FE_AUTO_BOT_WEBHOOK_URL }}
 
             elif [ $STATUS_CODE == 409 ]; then
               echo "Conflict detected: $SOURCE_BRANCH to $TARGET_BRANCH"
-              curl -H 'Content-type: application/json' \
-                --data '{"text":"🔴 [Merge Conflict] *'"$SOURCE_BRANCH to $TARGET_BRANCH"'*"}' \
-                -X POST ${{ secrets.SLACK_FE_AUTO_BOT_WEBHOOK_URL }}
+              curl -X POST \
+                -H 'Content-type: application/json' \
+                --data '{"text":"🔴 [Merge Conflict] *'$SOURCE_BRANCH' to '$TARGET_BRANCH'*"}' \
+                ${{ secrets.SLACK_FE_AUTO_BOT_WEBHOOK_URL }}
 
             else
               echo "Merge failed: $SOURCE_BRANCH to $TARGET_BRANCH"
-              curl -H 'Content-type: application/json' \
-                --data '{"text":"🔴 [Merge Failed] *'"$SOURCE_BRANCH to $TARGET_BRANCH"'*"}' \
-                -X POST ${{ secrets.SLACK_FE_AUTO_BOT_WEBHOOK_URL }}
+              curl -X POST \
+                -H 'Content-type: application/json' \
+                --data '{"text":"🔴 [Merge Failed] *'$SOURCE_BRANCH' to '$TARGET_BRANCH'*"}' \
+                ${{ secrets.SLACK_FE_AUTO_BOT_WEBHOOK_URL }}
             fi
           done
