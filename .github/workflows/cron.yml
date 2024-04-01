@@ -32,7 +32,7 @@ jobs:
             SOURCE_BRANCH=${BRANCHES[i]}
             TARGET_BRANCH=${BRANCHES[i+1]}
 
-            if git diff --quiet origin/$SOURCE_BRANCH origin/$TARGET_BRANCH; then
+            if git diff --quiet origin/$SOURCE_BRANCH..origin/$TARGET_BRANCH --; then
               echo "No changes detected: $SOURCE_BRANCH to $TARGET_BRANCH"
               continue
             fi
