@@ -2,7 +2,7 @@ name: Auto Back Merge Cron
 
 on:
   schedule:
-    - cron: "*/5,56,57 * * * *" # 평일 06:30, 13:30 KST
+    - cron: "57 * * * *" # 평일 06:30, 13:30 KST
 
 jobs:
   cron_schedule:
