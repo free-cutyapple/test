@@ -2,7 +2,7 @@ name: Auto Back Merge Cron
 
 on:
   schedule:
-    - cron: "57 * * * *" # 평일 06:30, 13:30 KST
+    - cron: "*/5,35 * * * *" # 평일 06:30, 13:30 KST
 
 jobs:
   cron_schedule:
@@ -28,7 +28,7 @@ jobs:
         id: create_pr
         uses: peter-evans/create-pull-request@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.FREECUTYAPPLE_PAT }}
           base: ${{ matrix.branches.target }}
           branch: ${{ matrix.branches.source }}
           title: "Auto Merge: ${{ matrix.branches.source }} into ${{ matrix.branches.target }}"
