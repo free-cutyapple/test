@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: ${{ matrix.branches.target }}
+          ref: ${{ matrix.branches.source }}
 
       - name: Checkout Source Branch
         run: git fetch origin ${{ matrix.branches.source }} && git checkout ${{ matrix.branches.source }}
@@ -29,7 +29,7 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.FREECUTYAPPLE_PAT }}
-          branch: ${{ matrix.branches.source }}
+          branch: ${{ matrix.branches.target }}
           title: "Auto Merge: ${{ matrix.branches.source }} into ${{ matrix.branches.target }}"
           body: "Automated merge of ${{ matrix.branches.source }} into ${{ matrix.branches.target }}"
 
