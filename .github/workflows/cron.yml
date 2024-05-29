@@ -29,8 +29,7 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.FREECUTYAPPLE_PAT }}
-          base: ${{ matrix.branches.source }}
-          branch: ${{ matrix.branches.target }}
+          branch: ${{ matrix.branches.source }}
           title: "Auto Merge: ${{ matrix.branches.source }} into ${{ matrix.branches.target }}"
           body: "Automated merge of ${{ matrix.branches.source }} into ${{ matrix.branches.target }}"
 
