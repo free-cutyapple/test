@@ -26,11 +26,11 @@ jobs:
 
       - name: Create Pull Request
         id: create_pr
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.FREECUTYAPPLE_PAT }}
-          base: ${{ matrix.branches.target }}
-          branch: ${{ matrix.branches.source }}
+          base: ${{ matrix.branches.source }}
+          branch: ${{ matrix.branches.target }}
           title: "Auto Merge: ${{ matrix.branches.source }} into ${{ matrix.branches.target }}"
           body: "Automated merge of ${{ matrix.branches.source }} into ${{ matrix.branches.target }}"
 
