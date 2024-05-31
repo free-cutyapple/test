@@ -28,17 +28,18 @@ jobs:
         id: create_pr
         uses: peter-evans/create-pull-request@v6
         with:
+          commit-message: auto back merge
           token: ${{ secrets.FREECUTYAPPLE_PAT }}
           branch: ${{ matrix.branches.target }}
           title: "Auto Merge: ${{ matrix.branches.source }} into ${{ matrix.branches.target }}"
           body: "Automated merge of ${{ matrix.branches.source }} into ${{ matrix.branches.target }}"
 
-      - name: Merge Pull Request
-        if: steps.create_pr.outputs.pull-request-url
-        run: |
-          PR_URL=$(echo "${{ steps.create_pr.outputs.pull-request-url }}" | sed 's/^https:\/\/api.github.com\/repos\//https:\/\/github.com\//')
-          curl -X PUT \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            $PR_URL/merge \
-            -d '{"commit_title":"Automated merge of ${{ matrix.branches.source }} into ${{ matrix.branches.target }}","merge_method":"merge"}'
+      # - name: Merge Pull Request
+      #   if: steps.create_pr.outputs.pull-request-url
+      #   run: |
+      #     PR_URL=$(echo "${{ steps.create_pr.outputs.pull-request-url }}" | sed 's/^https:\/\/api.github.com\/repos\//https:\/\/github.com\//')
+      #     curl -X PUT \
+      #       -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+      #       -H "Accept: application/vnd.github.v3+json" \
+      #       $PR_URL/merge \
+      #       -d '{"commit_title":"Automated merge of ${{ matrix.branches.source }} into ${{ matrix.branches.target }}","merge_method":"merge"}'
